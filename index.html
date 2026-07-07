@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🦷
-        د. خليل الوصابي - طب أسنان</title>
+    <title>عيادة د. خليل الوصابي - طب أسنان</title>
     <script src="https://cdn.tailwindcss.com">
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -205,8 +204,7 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
             <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
                 <div class="gradient-bg text-white p-8 text-center">
-                    <h2 class="text-2xl font-black">حجز موعد 🦷
-                    </h2>
+                    <h2 class="text-2xl font-black">حجز موعد عيادة</h2>
                     <p class="text-slate-300 text-sm mt-1">أدخل بياناتك وسيتم تحويلك لواتساب الدكتور مباشرة</p>
                 </div>
                 <form id="bookingForm" class="p-8 space-y-6" onsubmit="sendToWhatsapp(event)">
@@ -217,7 +215,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">رقم الهاتف (واتساب)</label>
-                            <input type="tel" id="patientPhone" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-left" placeholder="ادخل رقمك معا رمز الدولة+967" dir="ltr" />
+                            <input type="tel" id="patientPhone" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-left" placeholder="967770000000" dir="ltr" />
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -277,7 +275,7 @@
         </div>
     </footer>
 
-    <!-- ===== MODAL ===== (يظهر عند الحجز) -->
+    <!-- ===== MODAL ===== -->
     <div id="resultModal" class="modal-overlay hidden">
         <div class="modal-box">
             <div class="icon"><i class="fa-regular fa-circle-check"></i></div>
@@ -402,23 +400,20 @@
 
                 const encodedText = encodeURIComponent(fullText);
 
-                // الروابط: https و whatsapp scheme
-                const waUrlHttps = `https://wa.me/${doctorPhone}?text=${encodedText}`;
-                const waUrlScheme = `whatsapp://send?phone=${doctorPhone}&text=${encodedText}`;
+                // رابط wa.me (يعمل في جميع المتصفحات)
+                const waUrl = `https://wa.me/${doctorPhone}?text=${encodedText}`;
+                currentWhatsAppUrl = waUrl;
 
-                currentWhatsAppUrl = waUrlHttps; // نعرض الـ https في المودال
-
-                // 3️⃣ عرض المودال مع الرابط
+                // 3️⃣ عرض المودال
                 linkDisplay.textContent = currentWhatsAppUrl;
                 modal.classList.remove( hidden );
 
-                // محاولة فتح واتساب تلقائياً (مرة واحدة)
-                tryOpenWhatsApp(waUrlHttps, waUrlScheme);
+                // 4️⃣ محاولة فتح واتساب تلقائياً
+                tryOpenWhatsApp(waUrl);
 
             } catch (error) {
                 console.error("❌ فشل الحفظ في Firebase:", error);
-                alert("حدث خطأ في حفظ البيانات، لكن يمكنك المتابعة يدوياً.");
-                // مع ذلك نعرض المودال مع رابط واتساب احتياطي
+                // مع ذلك نعرض المودال مع رابط احتياطي
                 const fallbackText =
                     `🦷 *طلب حجز موعد جديد* 🦷\n\n` +
                     `👤 *اسم المريض:* ${name}\n` +
@@ -428,11 +423,11 @@
                     `⚠️ *تنبيه:* لم يتم حفظ البيانات في قاعدة البيانات، يرجى تدوينها يدوياً.`;
 
                 const encodedText = encodeURIComponent(fallbackText);
-                const waUrlHttps = `https://wa.me/${doctorPhone}?text=${encodedText}`;
-                currentWhatsAppUrl = waUrlHttps;
+                const waUrl = `https://wa.me/${doctorPhone}?text=${encodedText}`;
+                currentWhatsAppUrl = waUrl;
                 linkDisplay.textContent = currentWhatsAppUrl;
                 modal.classList.remove( hidden );
-                tryOpenWhatsApp(waUrlHttps, `whatsapp://send?phone=${doctorPhone}&text=${encodedText}`);
+                tryOpenWhatsApp(waUrl);
             } finally {
                 submitBtn.innerHTML = originalHtml;
                 submitBtn.classList.remove("btn-loading");
@@ -440,38 +435,28 @@
         }
 
         // --------------------------------------------------------------
-        // 6. محاولة فتح واتساب بطرق متعددة
+        // 6. محاولة فتح واتساب (طريقة مزدوجة)
         // --------------------------------------------------------------
-        function tryOpenWhatsApp(httpsUrl, schemeUrl) {
-            // أولاً: محاولة فتح بـ https (wa.me) في نافذة جديدة
-            const win = window.open(httpsUrl,  _blank );
+        function tryOpenWhatsApp(url) {
+            // أولاً: محاولة فتح في نافذة جديدة (لتجنب مغادرة الصفحة)
+            const win = window.open(url,  _blank );
             if (!win || win.closed || typeof win.closed ==  undefined ) {
-                // فشل فتح النافذة، نجرب scheme
-                window.location.href = schemeUrl;
-                // بعد 1.5 ثانية، إذا لم يتم فتح التطبيق، نعطي خيار النسخ
-                setTimeout(() => {
-                    // لا نقوم بأي شيء، المستخدم سيرى المودال
-                }, 1500);
+                // إذا فشل (متصفح يمنع النوافذ المنبثقة) ننتقل في نفس الصفحة
+                window.location.href = url;
             } else {
-                // تم فتح النافذة، نغلقها بعد فترة (اختياري)
-                setTimeout(() => { win.close(); }, 3000);
+                // نافذة جديدة فُتحت، نغلقها بعد 3 ثوانٍ (اختياري)
+                setTimeout(() => {
+                    try { win.close(); } catch (e) {}
+                }, 3000);
             }
         }
 
         // --------------------------------------------------------------
         // 7. أحداث المودال
         // --------------------------------------------------------------
-        // فتح واتساب يدوياً
+        // فتح واتساب يدوياً (بنفس الطريقة)
         openBtn.addEventListener( click , function() {
-            const httpsUrl = currentWhatsAppUrl;
-            const schemeUrl = httpsUrl.replace( https://wa.me/ ,  whatsapp://send?phone= );
-            // نحاول مرة أخرى
-            const win = window.open(httpsUrl,  _blank );
-            if (!win || win.closed || typeof win.closed ==  undefined ) {
-                window.location.href = schemeUrl;
-            } else {
-                setTimeout(() => { win.close(); }, 3000);
-            }
+            tryOpenWhatsApp(currentWhatsAppUrl);
         });
 
         // نسخ الرابط
