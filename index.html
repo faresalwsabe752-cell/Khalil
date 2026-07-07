@@ -351,7 +351,7 @@
         let currentWhatsAppUrl =   ;
 
         // --------------------------------------------------------------
-        // 5. الوظيفة الرئيسية
+        // 5. الوظيفة الرئيسية (بدون فتح تلقائي)
         // --------------------------------------------------------------
         async function sendToWhatsapp(e) {
             e.preventDefault();
@@ -399,17 +399,12 @@
                     `📋 *رقم الحجز:* ${docRef.id.slice(-6)}`;
 
                 const encodedText = encodeURIComponent(fullText);
-
-                // رابط wa.me (يعمل في جميع المتصفحات)
                 const waUrl = `https://wa.me/${doctorPhone}?text=${encodedText}`;
                 currentWhatsAppUrl = waUrl;
 
-                // 3️⃣ عرض المودال
+                // 3️⃣ عرض المودال فقط (بدون فتح تلقائي)
                 linkDisplay.textContent = currentWhatsAppUrl;
                 modal.classList.remove( hidden );
-
-                // 4️⃣ محاولة فتح واتساب تلقائياً
-                tryOpenWhatsApp(waUrl);
 
             } catch (error) {
                 console.error("❌ فشل الحفظ في Firebase:", error);
@@ -427,7 +422,6 @@
                 currentWhatsAppUrl = waUrl;
                 linkDisplay.textContent = currentWhatsAppUrl;
                 modal.classList.remove( hidden );
-                tryOpenWhatsApp(waUrl);
             } finally {
                 submitBtn.innerHTML = originalHtml;
                 submitBtn.classList.remove("btn-loading");
@@ -435,31 +429,31 @@
         }
 
         // --------------------------------------------------------------
-        // 6. محاولة فتح واتساب (طريقة مزدوجة)
+        // 6. فتح واتساب يدوياً (عند الضغط على الزر)
         // --------------------------------------------------------------
-        function tryOpenWhatsApp(url) {
-            // أولاً: محاولة فتح في نافذة جديدة (لتجنب مغادرة الصفحة)
-            const win = window.open(url,  _blank );
-            if (!win || win.closed || typeof win.closed ==  undefined ) {
-                // إذا فشل (متصفح يمنع النوافذ المنبثقة) ننتقل في نفس الصفحة
-                window.location.href = url;
+        function openWhatsAppManually() {
+            if (currentWhatsAppUrl) {
+                // محاولة فتح في نافذة جديدة (لتجنب مغادرة الصفحة)
+                const win = window.open(currentWhatsAppUrl,  _blank );
+                if (!win || win.closed || typeof win.closed ==  undefined ) {
+                    // إذا فشل، ننتقل في نفس الصفحة
+                    window.location.href = currentWhatsAppUrl;
+                } else {
+                    // نغلق النافذة بعد 3 ثوانٍ (اختياري)
+                    setTimeout(() => {
+                        try { win.close(); } catch (e) {}
+                    }, 3000);
+                }
             } else {
-                // نافذة جديدة فُتحت، نغلقها بعد 3 ثوانٍ (اختياري)
-                setTimeout(() => {
-                    try { win.close(); } catch (e) {}
-                }, 3000);
+                alert( الرابط غير جاهز، حاول مجدداً. );
             }
         }
 
         // --------------------------------------------------------------
         // 7. أحداث المودال
         // --------------------------------------------------------------
-        // فتح واتساب يدوياً (بنفس الطريقة)
-        openBtn.addEventListener( click , function() {
-            tryOpenWhatsApp(currentWhatsAppUrl);
-        });
+        openBtn.addEventListener( click , openWhatsAppManually);
 
-        // نسخ الرابط
         copyBtn.addEventListener( click , function() {
             const text = currentWhatsAppUrl;
             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -487,12 +481,10 @@
             document.body.removeChild(textarea);
         }
 
-        // إغلاق المودال
         closeBtn.addEventListener( click , function() {
             modal.classList.add( hidden );
         });
 
-        // إغلاق المودال بالنقر خارج المحتوى
         modal.addEventListener( click , function(e) {
             if (e.target === modal) {
                 modal.classList.add( hidden );
