@@ -90,7 +90,7 @@
             <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
                 <div class="gradient-bg text-white p-8 text-center">
                     <h2 class="text-2xl font-black">حجز موعد عيادة</h2>
-                    <p class="text-slate-300 text-sm mt-1">أدخل بياناتك وسيتم تحويلك لواتساب الدكتور مباشرة</p>
+                    <p class="text-slate-300 text-sm mt-1">أدخل بياناتك وسيتم إرسالها للدكتور مباشرة على الواتساب</p>
                 </div>
                 <form id="bookingForm" class="p-8 space-y-6" onsubmit="return false;">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -120,7 +120,7 @@
                             <input type="date" id="bookingDate" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" />
                         </div>
                     </div>
-                    <button type="button" id="submitBtn" onclick="sendBooking()" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-lg hover:opacity-95 transition flex items-center justify-center gap-2">
+                    <button type="button" onclick="sendBooking()" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-lg hover:opacity-95 transition flex items-center justify-center gap-2">
                         <i class="fab fa-whatsapp text-xl"></i> تأكيد الحجز وإرسال الموعد
                     </button>
                 </form>
@@ -160,6 +160,10 @@
     </footer>
 
     <script>
+        // بيانات بوت التليجرام
+        const botToken = "8352805503:AAEqRIlqOFZEQyndcAsKguo0WynUVoINAb0";
+        const chatId = "8245523694";
+
         function formatDate(dateStr) {
             if (!dateStr) return "";
             const parts = dateStr.split( - );
@@ -192,18 +196,47 @@
             }
 
             const formattedDate = formatDate(date);
-            const message = `🦷 *طلب حجز موعد جديد* 🦷\n\n` +
-                           `👤 *اسم المريض:* ${name}\n` +
-                           `📱 *رقم التواصل:* ${phone}\n` +
-                           `🩺 *الخدمة المطلوبة:* ${service}\n` +
-                           `📅 *التاريخ المفضّل:* ${formattedDate}\n\n` +
-                           `📥 _أرجو تأكيد الموعد وتحديد الساعة المناسبة._`;
+
+            // رسالة الواتساب
+            const whatsappMessage = `🦷 *طلب حجز موعد جديد* 🦷\n\n` +
+                                    `👤 *اسم المريض:* ${name}\n` +
+                                    `📱 *رقم التواصل:* ${phone}\n` +
+                                    `🩺 *الخدمة المطلوبة:* ${service}\n` +
+                                    `📅 *التاريخ المفضّل:* ${formattedDate}\n\n` +
+                                    `📥 _أرجو تأكيد الموعد وتحديد الساعة المناسبة._`;
 
             const doctorPhone = "967770423656";
-            const whatsappUrl = `https://wa.me/${doctorPhone}?text=${encodeURIComponent(message)}`;
-            
-            // هذا السطر الوحيد المضمون للاستضافة
-            window.location.href = whatsappUrl;
+            const whatsappUrl = `https://wa.me/${doctorPhone}?text=${encodeURIComponent(whatsappMessage)}`;
+
+            // رسالة التليجرام
+            const telegramMessage = `🔔 *حجز موعد جديد في العيادة*\n\n` +
+                                    `👤 *الاسم:* ${name}\n` +
+                                    `📱 *الرقم:* ${phone}\n` +
+                                    `🩺 *الخدمة:* ${service}\n` +
+                                    `📅 *التاريخ:* ${formattedDate}`;
+
+            // إرسال للتليجرام أولاً ثم فتح الواتساب (نفس تقنية كود التهنئة)
+            const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+            fetch(telegramUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    text: telegramMessage,
+                    parse_mode: "Markdown"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // فتح الواتساب بعد إرسال التليجرام بنجاح
+                window.open(whatsappUrl,  _blank );
+            })
+            .catch(err => {
+                console.log("Telegram Error: ", err);
+                // حتى لو فشل التليجرام، نفتح الواتساب
+                window.open(whatsappUrl,  _blank );
+            });
         }
     </script>
 </body>
