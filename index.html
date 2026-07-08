@@ -92,15 +92,15 @@
                     <h2 class="text-2xl font-black">حجز موعد عيادة</h2>
                     <p class="text-slate-300 text-sm mt-1">أدخل بياناتك وسيتم تحويلك لواتساب الدكتور مباشرة</p>
                 </div>
-                <form id="bookingForm" class="p-8 space-y-6" onsubmit="return false;">
+                <div class="p-8 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">الاسم الكامل</label>
-                            <input type="text" id="patientName" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" placeholder="أدخل اسمك الكريم" />
+                            <input type="text" id="patientName" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" placeholder="أدخل اسمك الكريم" />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">رقم الهاتف (واتساب)</label>
-                            <input type="tel" id="patientPhone" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-left" placeholder="967770000000" dir="ltr" />
+                            <input type="tel" id="patientPhone" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none text-left" placeholder="967770000000" dir="ltr" />
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -117,13 +117,13 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-2">تاريخ الموعد المفضّل</label>
-                            <input type="date" id="bookingDate" required class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" />
+                            <input type="date" id="bookingDate" class="w-full px-4 py-3 rounded-xl border border-slate-200 outline-none" />
                         </div>
                     </div>
                     <button type="button" onclick="sendData()" class="w-full gradient-bg text-white font-bold py-4 rounded-xl shadow-lg hover:opacity-95 transition flex items-center justify-center gap-2">
                         <i class="fab fa-whatsapp text-xl"></i> تأكيد الحجز وإرسال الموعد
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </section>
@@ -160,71 +160,22 @@
     </footer>
 
     <script>
-        function formatDate(dateStr) {
-            if (!dateStr) return "";
-            const parts = dateStr.split( - );
-            const year = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10);
-            const day = parseInt(parts[2], 10);
-
-            const arabicDays = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-            const arabicMonths = [
-                "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-                "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-            ];
-
-            const d = new Date(year, month - 1, day);
-            const dayName = arabicDays[d.getDay()];
-            const monthName = arabicMonths[month - 1];
-
-            return `${dayName}، ${day} ${monthName} ${year}`;
-        }
-
         function sendData() {
-            const botToken = "8352805503:AAEqRIlqOFZEQyndcAsKguo0WynUVoINAb0";
-            const chatId = "8245523694";
-            const doctorPhone = "967770423656";
-
             const name = document.getElementById("patientName").value.trim();
             const phone = document.getElementById("patientPhone").value.trim();
             const service = document.getElementById("requestedService").value;
             const date = document.getElementById("bookingDate").value;
+            const doctorPhone = "967770423656";
 
             if (!name || !phone || !date) {
-                alert("يرجى تعبئة جميع الحقول أولاً.");
+                alert("فضلاً، املأ جميع الحقول أولاً!");
                 return;
             }
 
-            const formattedDate = formatDate(date);
-
-            const telegramMessage = `🔔 حجز موعد جديد\n\n` +
-                                    `👤 الاسم: ${name}\n` +
-                                    `📱 الرقم: ${phone}\n` +
-                                    `🩺 الخدمة: ${service}\n` +
-                                    `📅 التاريخ: ${formattedDate}`;
-
-            const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-            // إرسال للتليجرام
-            fetch(telegramUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: telegramMessage
-                })
-            }).catch(err => console.log("Telegram Error: ", err));
-
-            // تحويل مباشر للواتساب بنفس الصفحة
-            const whatsappUrl = `https://wa.me/${doctorPhone}?text=${encodeURIComponent(
-                `🦷 طلب حجز موعد جديد\n\n` +
-                `👤 الاسم: ${name}\n` +
-                `📱 الرقم: ${phone}\n` +
-                `🩺 الخدمة: ${service}\n` +
-                `📅 التاريخ: ${formattedDate}`
-            )}`;
-
-            window.location.href = whatsappUrl;
+            const whatsappText = `🦷 طلب حجز موعد جديد%0A%0A👤 الاسم: ${name}%0A📱 الرقم: ${phone}%0A🩺 الخدمة: ${service}%0A📅 التاريخ: ${date}`;
+            const whatsappUrl = `https://wa.me/${doctorPhone}?text=${whatsappText}`;
+            
+            window.open(whatsappUrl,  _blank );
         }
     </script>
 </body>
