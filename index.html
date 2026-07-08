@@ -197,34 +197,34 @@
 
             const formattedDate = formatDate(date);
 
-            const telegramMessage = `🔔 *حجز موعد جديد*\n\n` +
-                                    `👤 *الاسم:* ${name}\n` +
-                                    `📱 *الرقم:* ${phone}\n` +
-                                    `🩺 *الخدمة:* ${service}\n` +
-                                    `📅 *التاريخ:* ${formattedDate}`;
+            const telegramMessage = `🔔 حجز موعد جديد\n\n` +
+                                    `👤 الاسم: ${name}\n` +
+                                    `📱 الرقم: ${phone}\n` +
+                                    `🩺 الخدمة: ${service}\n` +
+                                    `📅 التاريخ: ${formattedDate}`;
 
             const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
-            const whatsappText = `🦷 *طلب حجز موعد جديد* 🦷%0A%0A` +
-                                 `👤 *اسم المريض:* ${name}%0A` +
-                                 `📱 *رقم التواصل:* ${phone}%0A` +
-                                 `🩺 *الخدمة المطلوبة:* ${service}%0A` +
-                                 `📅 *التاريخ المفضّل:* ${formattedDate}%0A%0A` +
-                                 `📥 _أرجو تأكيد الموعد وتحديد الساعة المناسبة._`;
-
-            const whatsappUrl = `https://wa.me/${doctorPhone}?text=${whatsappText}`;
-
+            // إرسال للتليجرام
             fetch(telegramUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     chat_id: chatId,
-                    text: telegramMessage,
-                    parse_mode: "Markdown"
+                    text: telegramMessage
                 })
             }).catch(err => console.log("Telegram Error: ", err));
 
-            window.open(whatsappUrl,  _blank );
+            // تحويل مباشر للواتساب بنفس الصفحة
+            const whatsappUrl = `https://wa.me/${doctorPhone}?text=${encodeURIComponent(
+                `🦷 طلب حجز موعد جديد\n\n` +
+                `👤 الاسم: ${name}\n` +
+                `📱 الرقم: ${phone}\n` +
+                `🩺 الخدمة: ${service}\n` +
+                `📅 التاريخ: ${formattedDate}`
+            )}`;
+
+            window.location.href = whatsappUrl;
         }
     </script>
 </body>
